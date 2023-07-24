@@ -3,50 +3,11 @@ import pandas as pd
 from historicalData import loadPostgres
 import psycopg2
 
+def restoreBackup(filenameAvro, table_name):
 
-def restoreBackup(filename, table_name):
-
-    avro_file_path = "/Users/brenocarlo/globant-challenge/globantChallenge/backupAvro/" + filename
-
-    if table_name == 'departments':
-        ###### AQUI ######
-        your_avro_schema = {
-            "type": "record",
-            "name": "departments",
-            "fields": [
-                {"name": "id", "type": "int"},
-                {"name": "department", "type": "string"},
-                # Add other fields based on your table columns and data types.
-            ],
-        }
-    elif table_name == 'hired_employees':
-        your_avro_schema = {
-            "type": "record",
-            "name": "hired_employees",
-            "fields": [
-                {"name": "id", "type": "int"},
-                {"name": "name", "type": "string"},
-                {"name": "datetime", "type": "string"},
-                {"name": "department_id", "type": "integer"},
-                {"name": "job_id", "type": "integer"},
-                # Add other fields based on your table columns and data types.
-            ],
-        }
-    else:
-        your_avro_schema = {
-            "type": "record",
-            "name": "jobs",
-            "fields": [
-                {"name": "id", "type": "int"},
-                {"name": "job", "type": "string"},
-                # Add other fields based on your table columns and data types.
-            ],
-        }
+    avro_file_path = "/Users/brenocarlo/globant-challenge/globantChallenge/backupAvro/" + filenameAvro
     
-    with open(avro_file_path, "rb") as avro_file:
-        records = list(fastavro.reader(avro_file, schema=your_avro_schema))
-
-    df = pd.DataFrame.from_records(records)
+    df = avro_to_dataframe(avro_file_path)
 
     deletePostgres(table_name)
     loadPostgres(df, table_name)
@@ -70,3 +31,13 @@ def dbconnection():
     # Create a cursor
     cur = conn.cursor()
     return cur, conn
+
+def avro_to_dataframe(avro_file):
+    # Step 1: Read Avro data from the file
+    with open(avro_file, 'rb') as f:
+        avro_reader = fastavro.reader(f)
+        records = [record for record in avro_reader]
+
+    # Step 2: Convert Avro records to a pandas DataFrame
+    df = pd.DataFrame.from_records(records)
+    return df
