@@ -5,25 +5,26 @@ from apiInteractPost import apiInteractPost
 
 def fullProcessChallenge():
     
+   
     #Move historical csv data into SQL database.
-    # extractAndLoad('jobs.csv', 'jobs')
-    # extractAndLoad('hired_employees.csv', 'hired_employees')
-    # extractAndLoad('departments.csv', 'departments')
-  
+    extractAndLoad('jobs.csv', 'globant_jobs')
+    extractAndLoad('hired_employees.csv', 'globant_hired_employees')
+    extractAndLoad('departments.csv', 'globant_departments')
+   
     #Post JSON 1000 into API
-    #apiInteractPost()
-
+    apiInteractPost()
+    
     #Backup tables to AVRO
-    # backupTables('jobs.csv', 'jobs.avro', 'jobs')
-    # backupTables('hired_employees.csv', 'hired_employees.avro', 'hired_employees')
-    # backupTables('departments.csv', 'departments.avro', 'departments')
-
+    backupTables('jobs.csv', 'jobs.avro', 'globant_jobs')
+    backupTables('hired_employees.csv', 'hired_employees.avro', 'globant_hired_employees')
+    backupTables('departments.csv', 'departments.avro', 'globant_departments')
+    
     #Restore Backup
-    # restoreBackup('jobs.avro', 'jobs')
-    # restoreBackup('hired_employees.avro', 'hired_employees')
-    # restoreBackup('departments.avro', 'departments')
+    restoreBackup('jobs.avro', 'globant_jobs')
+    restoreBackup('hired_employees.avro', 'globant_hired_employees')
+    restoreBackup('departments.avro', 'globant_departments')
 
-    return
+    return 'Processo encerrado'
 
 
 fullProcessChallenge()

@@ -11,7 +11,7 @@ def backupTables(filename, filenameavro ,table_name):
         "password": "@Breno123"
     }
 
-    if table_name == 'departments':
+    if table_name == 'globant_departments':
         avro_schema = {
             "type": "record",
             "name": "departments",
@@ -20,7 +20,7 @@ def backupTables(filename, filenameavro ,table_name):
                 {"name": "department", "type": "string"},
             ]
         }
-    elif table_name == 'hired_employees':
+    elif table_name == 'globant_hired_employees':
         avro_schema = {
             "type": "record",
             "name": "hired_employees",
