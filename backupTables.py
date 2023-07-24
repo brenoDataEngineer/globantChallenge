@@ -1,57 +1,73 @@
-from fastavro import schemaless_writer
-from restoreBackuo import dbconnection
+import pandas as pd
+import psycopg2
+import fastavro
 
-def backupTables(filename, table_name):
-    cur, conn = dbconnection()
-    select_query = f"SELECT * FROM {table_name}"
+def backupTables(filename, filenameavro ,table_name):
+    
+    postgresql_connection_params = {
+        "host": "localhost",
+        "database": "postgres",
+        "user": "newuser",
+        "password": "@Breno123"
+    }
 
-    cur.execute(select_query)
-    columns = [desc[0] for desc in cur.description]  # Fetch column names
-    data = cur.fetchall()  # Fetch all rows
-
-    #If strucutre hired_employees, departments, jobs
-    # Replace 'your_avro_schema' with the Avro schema definition based on
     if table_name == 'departments':
-        ###### AQUI ######
-        your_avro_schema = {
+        avro_schema = {
             "type": "record",
             "name": "departments",
             "fields": [
                 {"name": "id", "type": "int"},
                 {"name": "department", "type": "string"},
-                # Add other fields based on your table columns and data types.
-            ],
+            ]
         }
     elif table_name == 'hired_employees':
-        your_avro_schema = {
+        avro_schema = {
             "type": "record",
             "name": "hired_employees",
             "fields": [
                 {"name": "id", "type": "int"},
                 {"name": "name", "type": "string"},
                 {"name": "datetime", "type": "string"},
-                {"name": "department_id", "type": "integer"},
-                {"name": "job_id", "type": "integer"},
-                # Add other fields based on your table columns and data types.
-            ],
+                {"name": "department_id", "type": "int"},
+                {"name": "job_id", "type": "int"},
+            ]
         }
     else:
-        your_avro_schema = {
+        avro_schema = {
             "type": "record",
             "name": "jobs",
             "fields": [
                 {"name": "id", "type": "int"},
                 {"name": "job", "type": "string"},
-                # Add other fields based on your table columns and data types.
-            ],
+            ]
         }
+    
+    # Extract data from PostgreSQL to DataFrame
+    df = extract_table_to_dataframe(table_name, postgresql_connection_params)
+  
+    #Convert the datafarme to csv
+    df.to_csv('/Users/brenocarlo/globant-challenge/globantChallenge/backupCsv/'+ filename, index=False)
 
-    avro_file_path = "/Users/brenocarlo/globant-challenge/globantChallenge/backupAvro/" + filename
+    #Set variables with the files address to use
+    csv_file = '/Users/brenocarlo/globant-challenge/globantChallenge/backupCsv/'+ filename
+    avro_file = '/Users/brenocarlo/globant-challenge/globantChallenge/backupAvro/'+ filenameavro
 
-    with open(avro_file_path, "wb") as avro_file:
-        for row in data:
-            record = dict(zip(columns, row))
-            schemaless_writer(avro_file, your_avro_schema, record)
+    #Convert the csv to Avro and save
+    csv_to_avro(csv_file, avro_file, avro_schema)
 
-    cur.close()
-    conn.close()
+def extract_table_to_dataframe(table_name, connection_params):
+    with psycopg2.connect(**connection_params) as conn:
+        query = f"SELECT * FROM {table_name}"
+        df = pd.read_sql(query, conn)
+    return df
+  
+def csv_to_avro(csv_file, avro_file, avro_schema):
+    # Step 1: Read CSV data into a pandas DataFrame
+    df = pd.read_csv(csv_file)
+
+    # Step 2: Convert DataFrame to Avro records
+    records = df.to_dict(orient='records')
+
+    # Step 3: Write Avro data to the output file
+    with open(avro_file, 'wb') as f:
+        fastavro.writer(f, avro_schema, records)
