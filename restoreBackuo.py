@@ -2,10 +2,15 @@ import fastavro
 import pandas as pd
 from historicalData import loadPostgres
 import psycopg2
+import os
+
+user_path = os.path.expanduser("~")
+
+user_path = user_path + "/globantBreno/"
 
 def restoreBackup(filenameAvro, table_name):
 
-    avro_file_path = "/Users/brenocarlo/globant-challenge/globantChallenge/backupAvro/" + filenameAvro
+    avro_file_path = user_path + "/globantChallenge/backupAvro/" + filenameAvro
     
     df = avro_to_dataframe(avro_file_path)
 
@@ -23,8 +28,8 @@ def dbconnection():
     conn = psycopg2.connect(
         host="localhost",
         dbname="postgres",
-        user="newuser",
-        password="@Breno123",
+        user="postgres",
+        password="pass#GLOBANT",
         port=5432,
     )
 
