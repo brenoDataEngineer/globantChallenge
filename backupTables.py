@@ -1,14 +1,19 @@
 import pandas as pd
 import psycopg2
 import fastavro
+import os
+
+user_path = os.path.expanduser("~")
+
+user_path = user_path + "/globantBreno/"
 
 def backupTables(filename, filenameavro ,table_name):
     
     postgresql_connection_params = {
         "host": "localhost",
         "database": "postgres",
-        "user": "newuser",
-        "password": "@Breno123"
+        "user": "postgres",
+        "password": "pass#GLOBANT"
     }
 
     if table_name == 'globant_departments':
@@ -46,11 +51,11 @@ def backupTables(filename, filenameavro ,table_name):
     df = extract_table_to_dataframe(table_name, postgresql_connection_params)
   
     #Convert the datafarme to csv
-    df.to_csv('/Users/brenocarlo/globant-challenge/globantChallenge/backupCsv/'+ filename, index=False)
+    df.to_csv(user_path + 'globantChallenge/backupCsv/'+ filename, index=False)
 
     #Set variables with the files address to use
-    csv_file = '/Users/brenocarlo/globant-challenge/globantChallenge/backupCsv/'+ filename
-    avro_file = '/Users/brenocarlo/globant-challenge/globantChallenge/backupAvro/'+ filenameavro
+    csv_file = user_path + 'globantChallenge/backupCsv/'+ filename
+    avro_file = user_path + '/globantChallenge/backupAvro/'+ filenameavro
 
     #Convert the csv to Avro and save
     csv_to_avro(csv_file, avro_file, avro_schema)
